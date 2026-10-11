@@ -59,10 +59,3 @@ Written by the builder of OnCall during the Amazon Developer Challenge (Aug 31 â
 **9. Lightsail can't take an IAM role.**
 - Lightsail is cheaper, but it can't attach an instance role, so keyless Bedrock access means EC2.
 - Suggestion: state this in the Lightsail-vs-EC2 comparison.
-
-## Hackathon logistics
-
-**10. Hosting has to stay live through judging.**
-- Judging ends Nov 20, so we needed a host that runs for about 50 days on $50 of credits.
-- The organizer's suggestion was Lambda. A stateful incident agent (metrics scraping, alert webhooks, background watches) fits a small always-on VM better.
-- Suggestion: a reference "stateful MCP on a budget" architecture.
