@@ -1,0 +1,1 @@
+{"version": "1.5.0", "gateway_timeout_ms": 25, "note": "Tighten payment gateway timeout (regression: below gateway latency)"}

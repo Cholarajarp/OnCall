@@ -1,0 +1,60 @@
+/*
+
+# Application
+!/server.py
+!/brain.py
+!/agent.py
+!/oncall_core.py
+!/oauth.py
+!/correlate.py
+!/integrations.py
+!/config.py
+!/app/
+!/production/
+!/target_service/
+!/executor/
+!/runbooks/
+!/deploy/
+
+# Run and build
+!/scripts/
+/scripts/*
+!/scripts/run_demo.py
+!/scripts/preview.py
+!/scripts/build_ui.mjs
+!/requirements.txt
+!/package.json
+!/package-lock.json
+!/Dockerfile
+!/compose.yaml
+!/.dockerignore
+!/.env.example
+
+# Repository
+!/.gitignore
+!/README.md
+!/LICENSE
+
+# Docs: architecture and the README banner only
+!/docs/
+/docs/*
+!/docs/ARCHITECTURE.md
+!/docs/FRICTION_LOG.md
+!/docs/images/
+/docs/images/*
+!/docs/images/oncall-banner.jpg
+
+# Never publish, even inside allowed folders
+__pycache__/
+*.py[cod]
+*.db
+*.db-*
+*.sqlite*
+*.log
+.env
+.env.*
+!/.env.example
+*.pem
+*.key
+deploy/aws/.last-ip
+deploy/alexa/addon.json

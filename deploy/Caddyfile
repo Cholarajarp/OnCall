@@ -1,0 +1,37 @@
+# Public HTTPS edge. Caddy obtains and renews a Let's Encrypt certificate for
+# {$ONCALL_DOMAIN}. Only ports 80/443 are public; every service binds 127.0.0.1.
+{$ONCALL_DOMAIN} {
+	encode gzip
+
+	# Streamable HTTP MCP (Alexa+ / any MCP client) and its OAuth 2.1 endpoints.
+	# Bearer (shared key or OAuth access token) enforced by OnCall.
+	@mcp path /mcp /mcp/* /.well-known/oauth-authorization-server /.well-known/oauth-protected-resource /.well-known/oauth-protected-resource/* /authorize /token /register /revoke /oauth/consent
+	handle @mcp {
+		reverse_proxy 127.0.0.1:8000 {
+			flush_interval -1
+		}
+	}
+
+	# Workspace + REST API (bearer enforced by OnCall). Public read-only status
+	# view lives at /status and /api/public/status.
+	handle {
+		reverse_proxy 127.0.0.1:8200
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Frame-Options DENY
+		-Server
+	}
+
+	request_body {
+		max_size 64KB
+	}
+
+	log {
+		output file /var/log/caddy/oncall-access.log {
+			roll_size 10MiB
+			roll_keep 3
+		}
+	}
+}

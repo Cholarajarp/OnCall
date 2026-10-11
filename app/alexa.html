@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#0b0d10">
+  <title>OnCall — Alexa+ simulator</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="./icons/oncall-32.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./icons/oncall-180.png">
+  <script src="./js/theme-init.js"></script>
+  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./alexa.css">
+</head>
+<body class="sim">
+  <a class="skip-link" href="#say-input">Skip to the Alexa command box</a>
+  <header class="sim-top">
+    <a class="sim-brand" href="./index.html"><img src="./icons/oncall-192.png" alt="" width="32" height="32"><span>OnCall <span class="muted">· Alexa+ simulator</span></span></a>
+    <div class="sim-top-controls">
+      <label class="sr-only" for="theme-select">Page color theme</label>
+      <select id="theme-select"><option value="system">System theme</option><option value="light">Light theme</option><option value="dark">Dark theme</option></select>
+      <button id="connection-button" class="button" type="button"><span class="sim-dot" aria-hidden="true"></span><span id="connection-label">Connecting…</span></button>
+    </div>
+  </header>
+
+  <main class="sim-stage" id="main">
+    <h1 class="sr-only">Simulated Echo Show running the OnCall skill</h1>
+    <div class="device" id="device" data-screen="offline" data-bar="off">
+      <div class="device-screen" id="screen">
+        <div class="screen-status" aria-hidden="true"><span id="status-clock">--:--</span><span id="status-mode">Not connected</span></div>
+
+        <section class="scene" data-scene="offline" aria-labelledby="offline-title">
+          <div class="scene-center">
+            <h2 id="offline-title" class="scene-big">Connecting to OnCall…</h2>
+            <p class="scene-sub" id="offline-detail">Waiting for the server.</p>
+          </div>
+        </section>
+
+        <section class="scene" data-scene="idle" aria-labelledby="idle-time">
+          <div class="ambient">
+            <p class="ambient-time" id="idle-time">--:--</p>
+            <p class="ambient-date" id="idle-date"></p>
+            <p class="ambient-health"><span class="pill" id="idle-pill" data-health="unknown"><span class="pill-dot" aria-hidden="true"></span><span id="idle-health">Health unknown</span></span></p>
+            <p class="ambient-note" id="idle-note"></p>
+          </div>
+        </section>
+
+        <section class="scene card" data-scene="incident" aria-labelledby="inc-title">
+          <p class="card-kicker"><span class="kicker-alert" aria-hidden="true"></span><span id="inc-kicker">Incident</span></p>
+          <h2 id="inc-title" class="card-title">Incident</h2>
+          <div class="card-grid">
+            <div class="stat"><span class="stat-label">Error rate</span><strong class="stat-value" id="inc-rate">unknown</strong><span class="stat-note" id="inc-samples"></span></div>
+            <div class="stat"><span class="stat-label">Health</span><strong class="stat-value"><span class="pill" id="inc-pill" data-health="unknown"><span class="pill-dot" aria-hidden="true"></span><span id="inc-health">Unknown</span></span></strong><span class="stat-note" id="inc-since"></span></div>
+            <div class="stat"><span class="stat-label">Latest release</span><strong class="stat-value mono" id="inc-commit">unknown</strong><span class="stat-note" id="inc-deployed"></span></div>
+          </div>
+          <figure class="spark" id="inc-spark-wrap"><svg id="inc-spark" viewBox="0 0 240 64" preserveAspectRatio="none" role="img" aria-labelledby="inc-spark-label"><title id="inc-spark-label">Observed error rate</title><polyline id="inc-spark-line" points=""/><circle id="inc-spark-dot" r="3.5" cx="-10" cy="-10"/></svg><figcaption id="inc-spark-caption">No observed measurements yet</figcaption></figure>
+          <div class="card-actions"><button class="device-button" type="button" id="ack-button" hidden>I'm on it · acknowledge</button></div>
+        </section>
+
+        <section class="scene card" data-scene="impact" aria-labelledby="imp-title">
+          <p class="card-kicker">Impact</p>
+          <h2 id="imp-title" class="card-title">How bad is it</h2>
+          <div class="card-grid" id="imp-grid">
+            <div class="stat"><span class="stat-label">Failed requests</span><strong class="stat-value" id="imp-failed">unknown</strong><span class="stat-note" id="imp-total"></span></div>
+            <div class="stat"><span class="stat-label">For</span><strong class="stat-value" id="imp-minutes">unknown</strong><span class="stat-note" id="imp-trend"></span></div>
+            <div class="stat"><span class="stat-label">Revenue at risk <em>estimate</em></span><strong class="stat-value" id="imp-revenue">unknown</strong><span class="stat-note" id="imp-estimate"></span></div>
+          </div>
+          <p class="card-body" id="imp-summary"></p>
+        </section>
+
+        <section class="scene card" data-scene="suspect" aria-labelledby="sus-title">
+          <p class="card-kicker">Suspect release</p>
+          <h2 id="sus-title" class="card-title mono">unknown</h2>
+          <div class="card-grid two">
+            <div class="stat"><span class="stat-label">Deployed</span><strong class="stat-value" id="sus-deployed">unknown</strong><span class="stat-note" id="sus-ago"></span></div>
+            <div class="stat"><span class="stat-label">Lead time</span><strong class="stat-value small" id="sus-lead">unknown</strong></div>
+          </div>
+          <p class="card-body" id="sus-summary"></p>
+          <p class="card-caveat" id="sus-caveat"></p>
+        </section>
+
+        <section class="scene card" data-scene="runbook" aria-labelledby="run-title">
+          <p class="card-kicker">Runbook</p>
+          <h2 id="run-title" class="card-title">Runbook</h2>
+          <ol class="steps" id="run-steps"></ol>
+          <p class="card-caveat" id="run-source"></p>
+        </section>
+
+        <section class="scene card" data-scene="history" aria-labelledby="his-title">
+          <p class="card-kicker">Seen before</p>
+          <h2 id="his-title" class="card-title">Similar incidents</h2>
+          <ul class="history" id="his-list"></ul>
+        </section>
+
+        <section class="scene card approval" data-scene="approval" aria-labelledby="apr-title">
+          <p class="card-kicker"><span class="kicker-alert" aria-hidden="true"></span>Approval required</p>
+          <div class="approval-layout">
+            <div>
+              <h2 id="apr-title" class="card-title">Roll back <span class="mono" id="apr-target">target</span></h2>
+              <dl class="approval-facts"><dt>Target</dt><dd class="mono" id="apr-target-exact"></dd><dt>Action ID</dt><dd class="mono" id="apr-id"></dd></dl>
+              <p class="approval-prompt" id="apr-prompt" role="status"></p>
+              <p class="approval-code" id="apr-code" hidden></p>
+              <form id="apr-code-form" class="approval-form" hidden><label for="apr-code-input" class="sr-only">Six-digit approval code</label><input id="apr-code-input" inputmode="numeric" autocomplete="one-time-code" maxlength="40" placeholder="6-digit code"><button class="device-button" type="submit">Submit code</button></form>
+              <div class="card-actions"><button class="device-button" type="button" id="apr-request">Send me a code</button><button class="device-button danger" type="button" id="apr-cancel">Cancel rollback</button></div>
+            </div>
+            <div class="ring-wrap" aria-hidden="true"><svg class="ring" viewBox="0 0 120 120"><circle class="ring-track" cx="60" cy="60" r="54"/><circle class="ring-fill" id="apr-ring" cx="60" cy="60" r="54"/></svg><span class="ring-label" id="apr-countdown">--</span></div>
+          </div>
+        </section>
+
+        <section class="scene card" data-scene="recovery" aria-labelledby="rec-title">
+          <p class="card-kicker">Recovery</p>
+          <div class="approval-layout">
+            <div>
+              <h2 id="rec-title" class="card-title">Watching fresh traffic</h2>
+              <p class="card-body" id="rec-detail"></p>
+              <p class="stat-note" id="rec-samples"></p>
+            </div>
+            <div class="ring-wrap" id="rec-ring-wrap" aria-hidden="true"><svg class="ring" viewBox="0 0 120 120"><circle class="ring-track" cx="60" cy="60" r="54"/><circle class="ring-fill" id="rec-ring" cx="60" cy="60" r="54"/></svg><span class="ring-label" id="rec-label">--</span></div>
+          </div>
+        </section>
+
+        <section class="scene card" data-scene="handoff" aria-labelledby="hand-title">
+          <p class="card-kicker">Handoff</p>
+          <h2 id="hand-title" class="card-title">Handoff</h2>
+          <div class="card-grid">
+            <div class="stat"><span class="stat-label">Status</span><strong class="stat-value small" id="hand-status">unknown</strong></div>
+            <div class="stat"><span class="stat-label">To acknowledge</span><strong class="stat-value small" id="hand-ack">unknown</strong></div>
+            <div class="stat"><span class="stat-label">To resolve</span><strong class="stat-value small" id="hand-resolve">unknown</strong></div>
+          </div>
+          <ol class="steps compact" id="hand-chronology"></ol>
+        </section>
+
+        <div class="transcript" id="transcript" role="log" aria-live="polite" aria-label="Conversation with Alexa">
+          <p class="t-user" id="t-user"></p>
+          <p class="t-alexa" id="t-alexa"></p>
+        </div>
+        <div class="sound-hint" id="sound-hint">Tap anywhere to enable sound</div>
+        <div class="light-bar" id="light-bar" aria-hidden="true"><span></span></div>
+      </div>
+      <span class="device-camera" aria-hidden="true"></span>
+    </div>
+
+    <section class="console" aria-label="Talk to Alexa">
+      <div class="chips" id="chips" role="group" aria-label="Suggested things to say"></div>
+      <form class="say" id="say-form">
+        <button class="talk" id="talk-button" type="button" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3"/></svg><span id="talk-label">Tap to talk</span></button>
+        <label class="sr-only" for="say-input">Type what you would say to Alexa</label>
+        <input id="say-input" type="text" maxlength="2000" autocomplete="off" placeholder="Type what you'd say, e.g. “Alexa, how bad is it?”">
+        <button class="button primary" id="say-send" type="submit">Say it</button>
+      </form>
+      <div class="console-row">
+        <label class="switch"><input type="checkbox" id="hands-free"> Hands-free (wake word “Alexa”)</label>
+        <label class="switch"><input type="checkbox" id="spoken" checked> Spoken replies</label>
+        <span id="mic-status" class="muted" role="status"></span>
+      </div>
+      <details class="judge" id="judge">
+        <summary>Judge controls</summary>
+        <p class="muted" id="judge-note">Start ships a known-bad release to the demo payments service; Reset restores the known-good one. Available when the server enables demo controls.</p>
+        <div class="judge-actions"><button class="button" type="button" id="demo-start">Start demo incident</button><button class="button" type="button" id="demo-reset">Reset demo</button></div>
+        <p id="judge-status" class="muted" role="status"></p>
+      </details>
+    </section>
+  </main>
+
+  <footer class="sim-footer"><p>Simulated Alexa+ surface. The incident agent, MCP tools and data are live; Alexa+ add-on access is not available to hackathon participants.</p><p><a href="./index.html">Open the full incident workspace</a></p></footer>
+
+  <dialog id="settings-dialog" aria-labelledby="settings-title"><form id="settings-form" method="dialog">
+    <div class="section-heading"><h2 id="settings-title">Connect to OnCall</h2><button class="icon-button" type="button" id="close-settings" aria-label="Close connection settings">×</button></div>
+    <p id="settings-message">Enter the API bearer token configured by your server operator. Leave blank for an unauthenticated local server.</p>
+    <label for="api-token">Bearer token <span class="muted">(optional)</span></label>
+    <input id="api-token" type="password" autocomplete="off" spellcheck="false" aria-describedby="token-help">
+    <p id="token-help" class="muted">Stored in sessionStorage for this tab only, shared with the workspace tab.</p>
+    <div class="settings-actions"><button class="button primary" type="submit" id="save-token">Save &amp; reconnect</button><button class="button" type="button" id="clear-token">Clear token</button></div>
+  </form></dialog>
+  <div id="live" class="sr-only" role="status" aria-live="polite"></div>
+  <script type="module" src="./js/alexa.mjs"></script>
+</body>
+</html>

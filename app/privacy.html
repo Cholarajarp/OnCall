@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>OnCall privacy policy</title>
+  <link rel="stylesheet" href="/legal.css">
+</head>
+<body>
+<main>
+  <h1>OnCall privacy policy</h1>
+  <p class="muted">Applies to a self-hosted OnCall server and its Alexa+ add-on. The person or team running the server is the data controller.</p>
+
+  <h2>What OnCall stores</h2>
+  <p>Everything is kept in one SQLite database on the operator's own server:</p>
+  <ul>
+    <li>Operational evidence: request and error samples, deployment records, alerts, incidents, approvals, executions, audit timeline and handoff reports.</li>
+    <li>Account linking: OAuth client records, single-use authorization codes and access/refresh tokens. Codes and tokens are stored only as SHA-256 hashes.</li>
+    <li>Voice approvals: a hash of each one-time code, its expiry and attempt count. With a paging channel configured, the code itself is never stored or returned in a response. In the sandbox with no pager, the demo shows the code on screen and keeps it until it expires.</li>
+    <li>Agent conversation threads, when the optional investigation agent is used.</li>
+  </ul>
+  <p>OnCall does not store your name, email address, voice recordings, location or Amazon account details. Alexa+ sends OnCall only the tool request and an access token.</p>
+
+  <h2>What leaves the server</h2>
+  <ul>
+    <li><strong>Paging</strong>, only if the operator sets <code>ONCALL_NOTIFY_URL</code>: the incident title, service, a link and, for voice approval, the one-time code, all sent to that endpoint.</li>
+    <li><strong>Investigation</strong>, only if the operator sets <code>ONCALL_BEDROCK_MODEL_ID</code>: incident evidence is sent to Amazon Bedrock in the operator's AWS account.</li>
+    <li><strong>Public status</strong>, only if <code>ONCALL_PUBLIC_STATUS=true</code>: a redacted, read-only view of health, error rates, release identifiers and incident titles.</li>
+  </ul>
+  <p>Nothing is sold, shared for advertising or sent to the OnCall authors.</p>
+
+  <h2>Retention and deletion</h2>
+  <p>Data stays until the operator deletes it. Expired authorization codes and service tokens are pruned automatically. To unlink Alexa, disable the add-on in the Alexa app. The operator can also revoke tokens at <code>/revoke</code> or delete the <code>oauth_*</code> rows.</p>
+
+  <h2>Contact</h2>
+  <p>Questions go to the operator of this OnCall server.</p>
+</main>
+</body>
+</html>

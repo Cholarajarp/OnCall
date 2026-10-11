@@ -1,0 +1,47 @@
+{
+  "manifestVersion": "1.0",
+  "storeListing": {
+    "distributionCountries": ["US"],
+    "locales": {
+      "en-US": {
+        "default": "DEFAULT",
+        "name": { "value": "OnCall" },
+        "shortDescription": "Hands-free incident response: find what broke, roll back with a one-time code, verify recovery.",
+        "fullDescription": "OnCall is an incident agent for the engineer who gets paged. Ask what's on fire and OnCall reads your real metrics, deployments and logs, then tells you which release lines up with the error spike. Ask it to roll back and it shows the exact release, then sends a one-time code to your pager. Saying yes never changes production; only the code, spoken back within 90 seconds, approves that one action. OnCall then watches fresh traffic and closes the incident only when recovery is proven. Every step lands in an audit timeline and a handoff report. Requires a self-hosted OnCall server linked to your account.",
+        "examplePhrases": [
+          "Ask OnCall what's on fire",
+          "Ask OnCall to roll back the latest deploy",
+          "Ask OnCall to check recovery",
+          "Ask OnCall for the incident handoff"
+        ],
+        "privacyAndCompliance": {
+          "privacyPolicyUrl": "https://YOUR_DOMAIN/privacy.html",
+          "termsOfUseUrl": "https://YOUR_DOMAIN/terms.html"
+        },
+        "mediaAssets": {
+          "icons": {
+            "light": [
+              { "size": "64x64", "uri": "https://YOUR_DOMAIN/icons/alexa-64.png" },
+              { "size": "72x72", "uri": "https://YOUR_DOMAIN/icons/alexa-72.png" },
+              { "size": "88x88", "uri": "https://YOUR_DOMAIN/icons/alexa-88.png" },
+              { "size": "126x126", "uri": "https://YOUR_DOMAIN/icons/alexa-126.png" },
+              { "size": "180x180", "uri": "https://YOUR_DOMAIN/icons/alexa-180.png" },
+              { "size": "241x241", "uri": "https://YOUR_DOMAIN/icons/alexa-241.png" }
+            ],
+            "dark": []
+          },
+          "carouselImages": [
+            { "uri": "https://YOUR_DOMAIN/icons/alexa-carousel.png", "altText": "OnCall incident briefing: error rate, the suspect release and the rollback awaiting a one-time code", "size": "600x900" }
+          ],
+          "bannerImages": []
+        }
+      }
+    }
+  },
+  "integrations": [
+    {
+      "type": "MCP",
+      "config": { "endpoints": { "default": { "type": "HTTPS", "uri": "https://YOUR_DOMAIN/mcp" } } }
+    }
+  ]
+}

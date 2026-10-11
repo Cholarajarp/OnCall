@@ -1,0 +1,22 @@
+groups:
+  - name: payments
+    rules:
+      - alert: CheckoutErrorRateHigh
+        # Same 5% threshold OnCall uses; requires traffic so silence is not "healthy".
+        expr: |
+          sum(rate(http_requests_total{service="payments",route="/checkout",status=~"5.."}[2m]))
+            / sum(rate(http_requests_total{service="payments",route="/checkout"}[2m])) > 0.05
+        for: 1m
+        labels:
+          severity: critical
+          service: payments
+        annotations:
+          summary: Checkout 5xx above 5% for 1 minute
+      - alert: PaymentsDown
+        expr: up{job="payments"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: payments
+        annotations:
+          summary: Payments metrics endpoint is not being scraped

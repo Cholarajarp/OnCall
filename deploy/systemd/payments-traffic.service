@@ -1,0 +1,20 @@
+[Unit]
+Description=Synthetic checkout traffic (keeps telemetry fresh; without traffic OnCall reports unknown)
+After=payments.service
+Requires=payments.service
+
+[Service]
+User=payments
+Group=payments
+WorkingDirectory=/opt/oncall/app
+ExecStart=/opt/oncall/venv/bin/python -m production.traffic --url http://127.0.0.1:9100/checkout --rps 2
+Restart=always
+RestartSec=5
+MemoryMax=40M
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

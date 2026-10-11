@@ -1,0 +1,21 @@
+{
+  "name": "oncall-ui",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:ui": "node scripts/build_ui.mjs",
+    "test:ui": "node --test tests/ui-state.mjs tests/voice-session.mjs tests/alexa-ui.mjs",
+    "test:browser": "node scripts/browser_acceptance.mjs"
+  },
+  "devDependencies": {
+    "@astryxdesign/core": "0.6.1",
+    "@astryxdesign/theme-neutral": "0.6.1",
+    "esbuild": "0.28.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "overrides": {
+    "@stylexjs/stylex": "0.19.0",
+    "lucide-react": "1.45.0"
+  }
+}

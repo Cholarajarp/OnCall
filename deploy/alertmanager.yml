@@ -1,0 +1,18 @@
+# Alertmanager -> OnCall webhook. The bearer key file is written by install.sh
+# (mode 0640, owned by alertmanager) and never committed.
+route:
+  receiver: oncall
+  group_by: [alertname, service]
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 5m
+
+receivers:
+  - name: oncall
+    webhook_configs:
+      - url: http://127.0.0.1:8200/api/alerts
+        send_resolved: true
+        http_config:
+          authorization:
+            type: Bearer
+            credentials_file: /etc/oncall/alertmanager-bearer

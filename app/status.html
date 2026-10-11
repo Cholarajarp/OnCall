@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>OnCall — Live production status</title>
+  <style>
+    :root { --bg:#f6f6f3; --fg:#1d201d; --muted:#5b615b; --line:#d9dbd5; --surface:#fff; --ok:#1f7a45; --bad:#b3261e; --warn:#8a5a00; }
+    @media (prefers-color-scheme: dark) { :root { --bg:#151715; --fg:#eceee9; --muted:#a6aca5; --line:#343833; --surface:#1d201d; --ok:#5cc58a; --bad:#ff8a80; --warn:#f0b54a; } }
+    * { box-sizing: border-box; }
+    body { margin:0; font:15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; background:var(--bg); color:var(--fg); }
+    main { max-width:960px; margin:0 auto; padding:24px 16px 48px; }
+    header { display:flex; flex-wrap:wrap; gap:12px; align-items:baseline; justify-content:space-between; }
+    h1 { font-size:1.4rem; margin:0; } h2 { font-size:1rem; margin:0 0 12px; }
+    .muted { color:var(--muted); }
+    .grid { display:grid; gap:16px; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); margin-top:16px; }
+    section { background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:16px; }
+    .badge { display:inline-block; padding:2px 10px; border-radius:999px; border:1px solid currentColor; font-weight:600; }
+    .healthy { color:var(--ok); } .degraded { color:var(--bad); } .unknown { color:var(--warn); }
+    .big { font-size:2rem; font-weight:700; }
+    svg { width:100%; height:160px; } .line { fill:none; stroke:var(--bad); stroke-width:2; } .grid-line { stroke:var(--line); }
+    ol { list-style:none; margin:0; padding:0; } li { padding:6px 0; border-top:1px solid var(--line); display:flex; gap:12px; }
+    li:first-child { border-top:0; } time { color:var(--muted); min-width:72px; font-variant-numeric:tabular-nums; }
+    code { font:13px ui-monospace, monospace; }
+    footer { margin-top:24px; font-size:13px; }
+    @media (prefers-reduced-motion: no-preference) { .pulse { animation:pulse 2s infinite; } @keyframes pulse { 50% { opacity:.5; } } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div><h1>Live production status</h1><p class="muted" id="scope">Read-only view of a real deployment monitored by OnCall.</p></div>
+    <p><span id="health" class="badge unknown" role="status">Connecting…</span></p>
+  </header>
+  <div class="grid">
+    <section aria-labelledby="rate-h"><h2 id="rate-h">Checkout error rate</h2><p class="big" id="rate">—</p><p class="muted" id="samples">Waiting for telemetry</p></section>
+    <section aria-labelledby="inc-h"><h2 id="inc-h">Incident</h2><p id="incident">No incident recorded.</p><p class="muted" id="incident-meta"></p></section>
+    <section aria-labelledby="dep-h"><h2 id="dep-h">Active release</h2><p id="release">—</p><p class="muted" id="release-meta"></p></section>
+  </div>
+  <section style="margin-top:16px" aria-labelledby="chart-h"><h2 id="chart-h">Measured error rate (Prometheus, 2-minute buckets)</h2><div id="chart"><p class="muted">No measurements yet.</p></div></section>
+  <section style="margin-top:16px" aria-labelledby="tl-h"><h2 id="tl-h">Incident timeline</h2><ol id="timeline"><li class="muted">No events yet.</li></ol></section>
+  <footer class="muted">Every value here is measured, never estimated. Missing or stale telemetry shows as unknown. Rollbacks require an operator's explicit, expiring approval of the exact release. Event details, logs and approval IDs are not published. <span id="updated"></span></footer>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const pct = v => `${(v * 100).toFixed(1)}%`;
+const hhmm = v => Number.isFinite(Date.parse(v)) ? new Date(v).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
+function chart(series) {
+  const pts = series.map(p => ({ at: Date.parse(p.ts), r: p.error_rate })).filter(p => Number.isFinite(p.at) && typeof p.r === 'number');
+  if (!pts.length) { $('chart').innerHTML = '<p class="muted">No measurements yet.</p>'; return; }
+  const a = pts[0].at, b = pts.at(-1).at, x = t => b === a ? 300 : 10 + (t - a) / (b - a) * 580, y = r => 150 - r * 140;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 600 160'); svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', `Error rate over ${pts.length} measurements, latest ${pct(pts.at(-1).r)}`);
+  svg.innerHTML = [0, .5, 1].map(r => `<line class="grid-line" x1="10" x2="590" y1="${y(r)}" y2="${y(r)}"/>`).join('') +
+    `<polyline class="line" points="${pts.map(p => `${x(p.at)},${y(p.r)}`).join(' ')}"/>`;
+  $('chart').replaceChildren(svg);
+}
+async function load() {
+  try {
+    const res = await fetch('/api/public/status', { cache: 'no-store' });
+    if (!res.ok) throw new Error(res.status);
+    const s = await res.json();
+    const h = s.health || 'unknown';
+    $('health').className = `badge ${h}${h === 'degraded' ? ' pulse' : ''}`;
+    $('health').textContent = { healthy: 'Healthy', degraded: 'Degraded', unknown: 'Unknown' }[h];
+    $('scope').textContent = `${s.service} · ${s.mode === 'live' ? 'live production' : 'sandbox'} · read-only`;
+    $('rate').textContent = s.current_error_rate === null ? '—' : pct(s.current_error_rate);
+    $('samples').textContent = s.sample_count ? `${Math.round(s.sample_count).toLocaleString()} requests measured` : 'No fresh telemetry: health is unknown';
+    const inc = s.incident;
+    $('incident').textContent = inc ? `${inc.title} — ${inc.status}` : 'No incident recorded.';
+    $('incident-meta').textContent = inc ? [`Started ${hhmm(inc.started_at)}`, inc.acknowledged_at && `acknowledged ${hhmm(inc.acknowledged_at)}`, inc.resolved_at && `resolved ${hhmm(inc.resolved_at)}`, s.approval_waiting && 'rollback awaiting operator approval'].filter(Boolean).join(' · ') : '';
+    const active = [...(s.deploys || [])].reverse().find(d => d.active);
+    $('release').innerHTML = active ? `<code></code>` : 'No active release reported';
+    if (active) $('release').querySelector('code').textContent = active.commit;
+    $('release-meta').textContent = active ? `Deployed ${hhmm(active.deployed_at)}` : '';
+    chart(s.series || []);
+    const items = (s.timeline || []).slice().reverse();
+    $('timeline').replaceChildren(...(items.length ? items.map(e => { const li = document.createElement('li'); const t = document.createElement('time'); t.textContent = hhmm(e.at); const span = document.createElement('span'); span.textContent = e.title; li.append(t, span); return li; }) : [Object.assign(document.createElement('li'), { className: 'muted', textContent: 'No events yet.' })]));
+    $('updated').textContent = `Updated ${hhmm(s.last_updated)}.`;
+  } catch {
+    $('health').className = 'badge unknown'; $('health').textContent = 'Unavailable';
+  }
+}
+load(); setInterval(load, 5000);
+</script>
+</body>
+</html>

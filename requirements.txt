@@ -1,0 +1,11 @@
+# Direct runtime dependencies pinned to the versions verified in this workspace.
+mcp==1.30.0
+fastapi==0.141.1
+uvicorn==0.52.4
+httpx==0.28.1
+python-dotenv==1.2.3
+pydantic==2.13.5
+# Used only when ONCALL_BEDROCK_MODEL_ID is set; otherwise no AWS client/call.
+boto3==1.43.93
+# Metrics export for the production payments service (production/payments/app.py).
+prometheus-client==0.26.0

@@ -1,0 +1,22 @@
+[Unit]
+Description=Payments service (watched by OnCall)
+After=network-online.target
+
+[Service]
+User=payments
+Group=payments
+WorkingDirectory=/opt/oncall/app
+Environment=PAYMENTS_STATE_DIR=/var/lib/payments
+ExecStart=/opt/oncall/venv/bin/uvicorn production.payments.app:app --host 127.0.0.1 --port 9100 --log-level warning
+Restart=always
+RestartSec=2
+MemoryMax=80M
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadOnlyPaths=/var/lib/payments
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

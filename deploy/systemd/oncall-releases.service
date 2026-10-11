@@ -1,0 +1,25 @@
+[Unit]
+Description=Release controller (deploy ledger + rollback webhook)
+After=network-online.target
+
+[Service]
+# Runs as the payments group so it can write the release pointer the service reads.
+User=releases
+Group=payments
+WorkingDirectory=/opt/oncall/app
+EnvironmentFile=/etc/oncall/releases.env
+Environment=PAYMENTS_STATE_DIR=/var/lib/payments RELEASES_SERVE=1
+ExecStart=/opt/oncall/venv/bin/uvicorn production.releases:app --host 127.0.0.1 --port 8400 --log-level warning
+Restart=on-failure
+RestartSec=3
+MemoryMax=60M
+UMask=0027
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/payments
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

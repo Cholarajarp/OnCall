@@ -1,0 +1,20 @@
+[Unit]
+Description=Prometheus
+After=network-online.target
+
+[Service]
+User=prometheus
+Group=prometheus
+ExecStart=/opt/prometheus/prometheus --config.file=/etc/oncall/prometheus.yml \
+  --storage.tsdb.path=/var/lib/prometheus --storage.tsdb.retention.time=7d \
+  --storage.tsdb.retention.size=1GB --web.listen-address=127.0.0.1:9090
+Restart=on-failure
+MemoryMax=150M
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/prometheus
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

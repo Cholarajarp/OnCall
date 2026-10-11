@@ -1,0 +1,27 @@
+[Unit]
+Description=OnCall incident agent (MCP + API)
+After=network-online.target oncall-releases.service prometheus.service
+Wants=network-online.target
+
+[Service]
+User=oncall
+Group=oncall
+WorkingDirectory=/opt/oncall/app
+EnvironmentFile=/etc/oncall/oncall.env
+ExecStart=/opt/oncall/venv/bin/python scripts/run_demo.py
+Restart=on-failure
+RestartSec=5
+# Children get SIGTERM with the launcher; bound the graceful stop. The launcher also
+# waits briefly for ports on start, so a restart never crash-loops on a lingering child.
+TimeoutStopSec=20
+MemoryMax=220M
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/oncall
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+
+[Install]
+WantedBy=multi-user.target

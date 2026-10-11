@@ -1,0 +1,314 @@
+/* OnCall studio skin.
+   Visual language borrowed from the Fitness Studio project (black/zinc surfaces, #ff6600 orange,
+   silver #c0c0c0, heavy uppercase labels, square-edged buttons) applied to OnCall's EXISTING
+   layout. No markup or layout changes; loaded after styles.css and session.css. */
+
+/* ---------- Tokens: light ---------- */
+:root {
+  --canvas: #f4f4f5; --surface: #ffffff; --subtle: #f4f4f5; --ink: #09090b; --muted: #52525b;
+  --line: #e4e4e7; --line-strong: #a1a1aa; --silver: #c0c0c0;
+  --rail: #09090b; --rail-ink: #fafafa; --rail-muted: #a1a1aa; --rail-hover: #18181b;
+  /* Orange fill always carries white text at 16px/700+ (large-text contrast).
+     --accent-text is the darker orange used for small orange text on light surfaces (AA). */
+  --accent: #ff6600; --accent-hover: #e65c00; --accent-soft: #fff1e6; --accent-text: #b84a00;
+  --success: #15803d; --success-soft: #ecfdf3; --danger: #c81e1e; --danger-soft: #fef1f1; --warning: #a15c00; --warning-soft: #fff7e6;
+  --radius: 2px; --radius-lg: 4px;
+  --display: Inter, "Segoe UI Variable Display", "Segoe UI", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+}
+/* ---------- Tokens: dark (Fitness Studio's native look) ---------- */
+:root[data-appearance="dark"] {
+  --canvas: #09090b; --surface: #18181b; --subtle: #27272a; --ink: #fafafa; --muted: #a1a1aa;
+  --line: #27272a; --line-strong: #3f3f46; --silver: #c0c0c0;
+  --rail: #000000; --rail-ink: #fafafa; --rail-muted: #a1a1aa; --rail-hover: #18181b;
+  --accent: #ff6600; --accent-hover: #ff8533; --accent-soft: #2a1505; --accent-text: #ff8533;
+  --success: #4ade80; --success-soft: #0f2a1a; --danger: #f87171; --danger-soft: #2d1212; --warning: #fbbf24; --warning-soft: #2a2008;
+}
+
+/* ---------- Fix: viewport-locked session, only the chat scrolls ----------
+   Before: the panel used a hard-coded calc(100dvh - 184px) that ignored notices/banners,
+   and .conversation (flex:1) kept min-height:auto, so it grew instead of scrolling and
+   pushed the composer below the fold. Now each level fills the remaining height. */
+.page { height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
+.topbar, .environment-banner { flex-shrink: 0; }
+main { flex: 1; min-height: 0; display: flex; flex-direction: column; width: 100%; padding-bottom: var(--space-4); }
+main > .notice, main > .session-toolbar { flex-shrink: 0; }
+.workspace-layout { flex: 1; min-height: 0; }
+.assistant-panel { height: auto; min-height: 0; }
+.workspace-column { max-height: none; height: 100%; }
+.conversation { min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
+.assistant-header, .approval-panel, .command-area, .tool-inspector { flex-shrink: 0; }
+.approval-panel { max-height: 40dvh; }
+.tool-inspector[open] { max-height: 200px; }
+@media (max-width: 760px) {
+  .assistant-panel { height: 100%; min-height: 0; }
+  .workspace-column:not([hidden]) { max-height: none; }
+}
+/* Very short viewports: fall back to normal document scrolling instead of crushing the chat. */
+@media (max-height: 560px) {
+  .page { height: auto; overflow: visible; }
+  .assistant-panel { height: 520px; }
+}
+
+/* ---------- Base ---------- */
+body { background: var(--canvas); font-family: var(--display); }
+h1, h2, h3 { font-family: var(--display); }
+h2 { font-weight: 800; letter-spacing: -.02em; }
+.assistant-welcome h3 { font-weight: 900; letter-spacing: -.05em; text-transform: uppercase; }
+.welcome-symbol { color: var(--accent); }
+::selection { background: var(--accent); color: #fff; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Scrollbars (Fitness Studio: square orange thumb) */
+* { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+/* ---------- Rail (always black, like the studio nav) ---------- */
+.rail { background: var(--rail); color: var(--rail-ink); border-right: 1px solid #27272a; }
+.brand { color: var(--rail-ink); }
+.brand-mark { width: 40px; height: 40px; display: block; border-radius: 4px; }
+.rail nav a { border-radius: 0; color: var(--rail-muted); }
+.rail nav a:hover { background: var(--rail-hover); color: var(--rail-ink); }
+.rail nav a[aria-current] { background: var(--rail-hover); color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+
+/* ---------- Topbar ---------- */
+.topbar { background: var(--canvas); border-bottom: 1px solid var(--line); }
+.breadcrumb { font-weight: 900; text-transform: uppercase; letter-spacing: .04em; font-size: var(--text-base); }
+.breadcrumb strong { font-weight: 900; color: var(--ink); }
+.connection-status { border: 1px solid var(--line); border-radius: 0; padding: var(--space-1) var(--space-3); background: var(--surface); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; font-size: 12px; }
+.connection-status:hover { border-color: var(--ink); }
+.status-dot { width: 8px; height: 8px; border-radius: 0; }
+.connection-status[data-status="connected"] .status-dot { background: var(--success); }
+.connection-status[data-status="error"] .status-dot { background: var(--danger); }
+
+#theme-select {
+  appearance: none; -webkit-appearance: none; min-height: 40px; border-radius: 0;
+  border: 1px solid var(--line); background-color: var(--surface); color: var(--ink);
+  font-weight: 700; text-transform: uppercase; letter-spacing: .06em; font-size: 12px;
+  padding: var(--space-2) 32px var(--space-2) var(--space-3); cursor: pointer;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 16px) 52%, calc(100% - 11px) 52%; background-size: 5px 5px; background-repeat: no-repeat;
+}
+#theme-select:hover { border-color: var(--ink); }
+.environment-banner { color: var(--muted); }
+
+/* ---------- Badges: square, uppercase tags ---------- */
+.badge { border-radius: 0; padding: 2px var(--space-2); font-weight: 800; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; border: 1px solid var(--line-strong); background: transparent; color: var(--muted); }
+.badge.healthy { color: var(--success); background: var(--success-soft); border-color: currentColor; }
+.badge.degraded, .badge.danger { color: var(--danger); background: var(--danger-soft); border-color: currentColor; }
+.badge.warning { color: var(--warning); background: var(--warning-soft); border-color: currentColor; }
+
+/* ---------- Buttons: rectangles, uppercase, heavy ---------- */
+.button {
+  border-radius: 0; min-height: 44px; padding: var(--space-2) var(--space-6);
+  font-weight: 800; text-transform: uppercase; letter-spacing: .08em; font-size: 13px;
+  border: 1px solid var(--line-strong); background: transparent; color: var(--ink);
+  transition: background-color 140ms ease-out, border-color 140ms ease-out, color 140ms ease-out;
+}
+.button:hover:not(:disabled) { background: var(--subtle); border-color: var(--ink); }
+.button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 900; font-size: 14px; }
+.button.primary:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); color: #fff; }
+.send-button { background: var(--accent); border: 1px solid var(--accent); color: #fff; border-radius: 0; font-weight: 900; font-size: 14px; }
+.send-button:hover:not(:disabled) { background: var(--accent-hover); border-color: var(--accent-hover); color: #fff; }
+.microphone { border-radius: 0; border: 1px solid var(--line-strong); background: transparent; color: var(--ink); }
+.microphone:hover:not(:disabled) { border-color: var(--ink); background: var(--subtle); }
+.microphone[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-text); border-color: var(--accent); }
+.icon-button, .rail-button { border-radius: 0; }
+
+/* ---------- Chips ---------- */
+.chip { border-radius: 0; border: 1px solid var(--line-strong); background: transparent; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; font-size: 12px; }
+.chip:hover { border-color: var(--accent); color: var(--accent-text); background: transparent; }
+
+/* ---------- Cards ---------- */
+.surface { border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: none; }
+.assistant-panel.surface { border: 0; }
+#workspace-view .incident-surface { border: 1px solid var(--line); border-left: 4px solid var(--accent); }
+.section-label { text-transform: uppercase; letter-spacing: .12em; font-size: 11px; font-weight: 800; color: var(--muted); }
+
+.metric-value strong { font-weight: 900; letter-spacing: -.05em; font-size: 44px; }
+.chart .data-line { stroke: var(--accent); stroke-width: 2.5; }
+.chart circle { stroke: var(--accent); }
+.chart-legend > span { background: var(--accent); }
+.chart-empty { border-radius: 0; }
+
+.workflow li { border-top-width: 3px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; font-size: 11px; }
+.workflow li.current { color: var(--accent-text); border-color: var(--accent); }
+.workflow li.done { color: var(--ink); border-color: var(--ink); }
+
+/* ---------- Conversation ---------- */
+.message-label { text-transform: uppercase; letter-spacing: .1em; font-size: 11px; font-weight: 800; }
+.message-label time { letter-spacing: .02em; }
+.message.user { background: var(--subtle); border-left: 3px solid var(--accent); border-radius: 0; padding: var(--space-3) var(--space-4); }
+.message.system { border-left: 3px solid var(--silver); }
+.command-area { border-radius: var(--radius-lg); border: 1px solid var(--line-strong); background: var(--surface); }
+.command-area:focus-within { border-color: var(--accent); }
+textarea { background: transparent; }
+textarea:focus-visible { outline: none; }
+.session-signal { color: var(--accent); }
+body[data-voice="listening"] .session-signal { color: var(--success); }
+input[type="checkbox"] { accent-color: var(--accent); }
+
+/* ---------- Inputs ---------- */
+input:not([type="checkbox"]), select:not(#theme-select) { border-radius: 0; border: 1px solid var(--line-strong); background: var(--surface); }
+input:not([type="checkbox"]):focus-visible { border-color: var(--accent); outline-offset: 0; }
+label:not(.voice-toggle) { text-transform: uppercase; letter-spacing: .1em; font-size: 11px; font-weight: 800; color: var(--muted); }
+
+/* ---------- Approval, notices, menus, dialogs ---------- */
+.approval-panel { border-radius: var(--radius-lg); border: 1px solid var(--warning); border-left-width: 4px; }
+.approval-panel h3 { font-weight: 900; text-transform: uppercase; letter-spacing: -.01em; }
+.notice { border-radius: 0; }
+.sandbox-menu summary { border: 1px solid var(--line-strong); padding: var(--space-2) var(--space-4); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; font-size: 12px; list-style: none; }
+.sandbox-menu summary::-webkit-details-marker { display: none; }
+.sandbox-menu[open] { border-radius: 0; border-color: var(--accent); }
+dialog { border-radius: 0; border: 2px solid var(--accent); }
+dialog::backdrop { background: #000000cc; }
+dialog h2 { text-transform: uppercase; font-weight: 900; }
+.tool-call pre { border-radius: 0; }
+
+/* ---------- UX gap fixes ---------- */
+/* Disabled: clearly unavailable, not a faded primary */
+.button:disabled, .send-button:disabled, .microphone:disabled {
+  opacity: 1; cursor: not-allowed; background: var(--subtle); border-color: var(--line); color: var(--muted);
+}
+.button.primary:disabled, .send-button:disabled { background: var(--subtle); border-color: var(--line); color: var(--muted); }
+
+/* No native scrollbar arrow buttons */
+::-webkit-scrollbar-button { display: none; height: 0; width: 0; }
+
+/* Compact chrome so the conversation keeps its height */
+.notice { padding: var(--space-3) var(--space-4); }
+.notice .button { min-height: 40px; padding: var(--space-2) var(--space-4); }
+.session-toolbar { padding: var(--space-1) 0 var(--space-2); }
+.session-toolbar .button { min-height: 40px; padding: var(--space-2) var(--space-4); }
+.assistant-header { padding-top: var(--space-2); padding-bottom: var(--space-2); }
+.button { white-space: nowrap; }
+
+/* ---------- Chat gets the screen ----------
+   Measured at 1800x807 before: header chrome 238px + composer 159px + inspector 56px
+   left the conversation 338px. Now: one-line banner, toolbar and session header share
+   a row, composer is a single line that grows, inspector folds into the composer footer. */
+.environment-banner { padding-top: 6px; padding-bottom: 6px; font-size: 12px; }
+main { padding-bottom: var(--space-2); }
+.session-toolbar { padding: var(--space-1) 0; min-height: 0; }
+.session-toolbar .button, .session-options .button { min-height: 32px; padding: 4px var(--space-3); font-size: 12px; }
+.assistant-header { padding: 2px 0 var(--space-1); }
+.assistant-identity h2 { font-size: 14px; }
+.assistant-identity p { margin-top: 0; font-size: 12px; line-height: 1.4; }
+#session-status { display: inline; }
+#reasoner-label:not([hidden]) { display: inline; }
+#reasoner-label:not([hidden])::before { content: " · "; }
+.session-signal { width: 28px; height: 28px; gap: 3px; }
+.session-signal i { height: 8px; } .session-signal i:nth-child(2), .session-signal i:nth-child(4) { height: 14px; } .session-signal i:nth-child(3) { height: 20px; }
+.voice-toggle { min-height: 32px; font-size: 13px; }
+
+.conversation { flex: 1 1 0; padding-top: var(--space-4); padding-bottom: var(--space-4); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+
+/* Composer: textarea and buttons on one row */
+.command-area { padding: var(--space-2) var(--space-3); margin-top: var(--space-2); }
+#command-form { display: flex; align-items: flex-end; gap: var(--space-2); flex-wrap: wrap; }
+#command-form textarea { flex: 1 1 320px; min-height: 40px; max-height: 160px; padding: 9px var(--space-2); }
+#command-form .composer-actions { margin-top: 0; gap: var(--space-2); flex-shrink: 0; }
+#command-form .composer-actions .button { min-height: 40px; }
+#mic-status { flex-basis: 100%; margin-top: 0; }
+.tool-inspector { padding: 2px var(--space-3); font-size: 12px; }
+.tool-inspector > summary { min-height: 28px; padding: 4px 0; }
+
+/* Messages: readable column, assistant replies easy to scan */
+.message + .message { margin-top: var(--space-3); }
+.message p { line-height: 1.55; }
+.message.user { padding: var(--space-2) var(--space-3); }
+.message.assistant { padding: var(--space-1) 0; }
+.message-label { margin-bottom: 4px; font-size: 12px; }
+/* Approval panel: compact strip (was ~320px and crushed the chat to ~145px).
+   Target facts on one line, buttons on the right; the full action ID stays visible but small. */
+.approval-panel { margin: var(--space-1) 0 var(--space-2); padding: var(--space-3) var(--space-4); max-height: 34dvh; overflow: auto;
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-4); row-gap: var(--space-1); align-items: center; }
+.approval-panel > * { grid-column: 1 / -1; margin: 0; }
+.approval-panel .section-heading { margin: 0; gap: var(--space-2); }
+.approval-panel h3 { font-size: 15px; }
+.approval-panel .section-heading + p { display: none; }
+.approval-panel dl { grid-column: 1; display: flex; flex-wrap: wrap; column-gap: var(--space-4); row-gap: 2px; font-size: 13px; }
+.approval-panel dl > dt { margin: 0; color: var(--muted); }
+.approval-panel dl > dt::after { content: ":"; }
+.approval-panel dl > dd { margin: 0 var(--space-3) 0 4px; font-weight: 600; }
+.approval-panel dl > dt:nth-of-type(3), .approval-panel dl > dd:nth-of-type(3) { flex-basis: auto; }
+#approval-id { font-size: 11px; font-weight: 400; overflow-wrap: anywhere; }
+#approval-countdown { grid-column: 1; font-size: 13px; }
+.approval-panel .approval-actions { grid-column: 2; grid-row: 2 / span 2; display: flex; gap: var(--space-2); margin: 0; }
+.approval-panel .approval-actions .button, .approval-panel .voice-approval .button { min-height: 36px; padding: 4px var(--space-3); font-size: 12px; }
+.approval-panel .voice-approval { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; }
+.approval-panel .code-form { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
+.approval-panel .code-form input { width: 160px; min-height: 36px; }
+.approval-panel > p.muted:last-child { font-size: 12px; line-height: 1.4; }
+.approval-panel .voice-approval { grid-column: 2; justify-content: flex-end; }
+.approval-panel > p.muted:last-child { grid-column: 1; grid-row: 4; }
+@media (max-width: 760px) { .approval-panel .voice-approval, .approval-panel > p.muted:last-child { grid-column: 1; grid-row: auto; justify-content: flex-start; } }
+@media (max-width: 760px) {
+  .approval-panel { grid-template-columns: 1fr; max-height: 30dvh; padding: var(--space-2) var(--space-3); }
+  .approval-panel .approval-actions { grid-column: 1; grid-row: auto; }
+  .approval-panel > p.muted:last-child { display: none; }
+  #approval-id { font-size: 10px; }
+  /* Session header: one compact row */
+  .assistant-header { flex-wrap: nowrap; padding: 0 0 2px; }
+  #reasoner-label { display: none !important; }
+  .assistant-identity p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .session-options { flex-shrink: 0; }
+  .voice-toggle { font-size: 11px; }
+  /* Composer: input row, then buttons; hint hidden */
+  .command-area { padding: var(--space-2); }
+  /* Composer: one row. Textarea, icon-only mic, Send. */
+  #command-form { flex-wrap: nowrap; align-items: flex-end; }
+  #command-form textarea { flex: 1 1 auto; min-width: 0; min-height: 40px; }
+  #command-form .composer-actions { width: auto; flex-shrink: 0; }
+  #mic-button { width: 40px; min-width: 40px; padding: 0; justify-content: center; }
+  #mic-button span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  #command-help { display: none; }
+  #mic-status[data-state="idle"], #mic-status:empty { display: none; }
+  #mic-status[data-state="active"] { flex-basis: 100%; }
+  #command-form:has(#mic-status[data-state="active"]) { flex-wrap: wrap; }
+}
+
+/* Jump-to-latest affordance when scrolled up */
+.conversation-jump { position: sticky; bottom: 0; margin: var(--space-2) auto 0; display: block; min-height: 32px; padding: 4px var(--space-3); font-size: 12px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink); border-radius: 999px; box-shadow: 0 4px 12px #0003; }
+.conversation-jump[hidden] { display: none; }
+
+/* Composer hint is secondary */
+#mic-status { color: var(--muted); font-size: 12px; }
+
+@media (max-width: 760px) {
+  /* Topbar: theme select must not overflow */
+  .topbar { padding-left: var(--space-3); padding-right: var(--space-3); gap: var(--space-2); }
+  .breadcrumb { font-size: 14px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .topbar-controls { flex-shrink: 0; }
+  #theme-select { max-width: 112px; font-size: 11px; padding-right: 28px; }
+  .connection-status { padding: var(--space-2); min-width: 40px; justify-content: center; }
+  .environment-banner { display: none; }
+
+  /* Notice: single compact row */
+  .notice { flex-wrap: wrap; gap: var(--space-2); }
+  .notice > div { flex-basis: 100%; }
+  .notice .button { flex: 1; }
+  .notice .icon-button { margin-left: 0; }
+
+  /* Keep the Spoken replies label visible (was font-size:0) */
+  .voice-toggle { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; gap: var(--space-2); }
+
+  /* Composer buttons stay on one line */
+  .microphone, .send-button { padding: var(--space-2) var(--space-4); font-size: 12px; }
+  .assistant-welcome h3 { font-size: 26px; }
+}
+@media (max-width: 380px) {
+  #theme-select { max-width: 92px; }
+}
+@media (max-width: 760px) {
+  /* Show only the current section; frees room for the theme select */
+  .breadcrumb { font-size: 0; flex: 1 1 auto; }
+  .breadcrumb strong { font-size: 14px; }
+  #theme-select { max-width: 104px; }
+  /* Simulator link: short label so the breadcrumb is never covered */
+  .topbar-controls { gap: var(--space-2); min-width: 0; }
+  .topbar-controls > a.button { padding: var(--space-2) var(--space-3); font-size: 0; white-space: nowrap; min-height: 40px; }
+  .topbar-controls > a.button::after { content: "Alexa+"; font-size: 12px; }
+}
